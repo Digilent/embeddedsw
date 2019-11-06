@@ -152,7 +152,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_SECURE_EXCLUDE_VAL
-#define FSBL_SECURE_EXCLUDE_VAL			(1U)
+#define FSBL_SECURE_EXCLUDE_VAL			(0U)
 #endif
 
 #ifndef FSBL_BS_EXCLUDE_VAL
