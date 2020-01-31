@@ -27,7 +27,7 @@
  * This file is part of the lwIP TCP/IP stack.
  *
  */
-
+ 
 #include "netif/xaxiemacif.h"
 #include "lwipopts.h"
 #include "sleep.h"
@@ -40,6 +40,7 @@
 #define PHY_DETECT_MASK 						0x1808
 #define PHY_MARVELL_IDENTIFIER					0x0141
 #define PHY_TI_IDENTIFIER					    0x2000
+#define PHY_REALTEK_IDENTIFIER				    0x001c
 
 /* Marvel PHY flags */
 #define MARVEL_PHY_IDENTIFIER 					0x141
@@ -126,8 +127,9 @@ static int detect_phy(XAxiEthernet *xaxiemacp)
 			XAxiEthernet_PhyRead(xaxiemacp, phy_addr, PHY_IDENTIFIER_1_REG,
 										&phy_reg);
 			if ((phy_reg != PHY_MARVELL_IDENTIFIER) &&
-                (phy_reg != TI_PHY_IDENTIFIER)){
-				xil_printf("WARNING: Not a Marvell or TI Ethernet PHY. Please verify the initialization sequence\r\n");
+                (phy_reg != TI_PHY_IDENTIFIER) && 
+				(phy_reg != PHY_REALTEK_IDENTIFIER)){
+				xil_printf("WARNING: Not a Marvell or TI or Realtek Ethernet PHY. Please verify the initialization sequence\r\n");
 			}
 			phyaddrforemac = phy_addr;
 			return phy_addr;
@@ -361,6 +363,78 @@ unsigned int get_phy_speed_TI_DP83867(XAxiEthernet *xaxiemacp, u32 phy_addr)
 	return get_phy_negotiated_speed(xaxiemacp, phy_addr);
 }
 
+static u32_t get_Realtek_phy_speed(XAxiEthernet *xaxiemacp, u32_t phy_addr)
+{
+	u16_t control;
+	u16_t status;
+	u16_t status_speed;
+	u32_t timeout_counter = 0;
+	u32_t temp_speed;
+
+	xil_printf("Start PHY autonegotiation \r\n");
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, &control);
+	control |= IEEE_ASYMMETRIC_PAUSE_MASK;
+	control |= IEEE_PAUSE_MASK;
+	control |= ADVERTISE_100;
+	control |= ADVERTISE_10;
+	XAxiEthernet_PhyWrite(xaxiemacp, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, control);
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET,
+					&control);
+	control |= ADVERTISE_1000;
+	XAxiEthernet_PhyWrite(xaxiemacp, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET,
+					control);
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+	control |= IEEE_CTRL_AUTONEGOTIATE_ENABLE;
+	control |= IEEE_STAT_AUTONEGOTIATE_RESTART;
+	XAxiEthernet_PhyWrite(xaxiemacp, phy_addr, IEEE_CONTROL_REG_OFFSET, control);
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+	control |= IEEE_CTRL_RESET_MASK;
+	XAxiEthernet_PhyWrite(xaxiemacp, phy_addr, IEEE_CONTROL_REG_OFFSET, control);
+
+	while (1) {
+		XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+		if (control & IEEE_CTRL_RESET_MASK)
+			continue;
+		else
+			break;
+	}
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+
+	xil_printf("Waiting for PHY to complete autonegotiation.\r\n");
+
+	while ( !(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE) ) {
+		sleep(1);
+		timeout_counter++;
+
+		if (timeout_counter == 30) {
+			xil_printf("Auto negotiation error \r\n");
+			return XST_FAILURE;
+		}
+		XAxiEthernet_PhyRead(xaxiemacp, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+	}
+	xil_printf("autonegotiation complete \r\n");
+
+	XAxiEthernet_PhyRead(xaxiemacp, phy_addr,IEEE_SPECIFIC_STATUS_REG,
+					&status_speed);
+	if (status_speed & 0x400) {
+		temp_speed = status_speed & IEEE_SPEED_MASK;
+
+		if (temp_speed == IEEE_SPEED_1000)
+			return 1000;
+		else if(temp_speed == IEEE_SPEED_100)
+			return 100;
+		else
+			return 10;
+	}
+
+	return XST_FAILURE;
+}
+
 unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, u32 phy_addr)
 {
 	u16 control;
@@ -589,6 +663,8 @@ unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp)
 		if (phy_model == TI_PHY_DP83867_MODEL) {
 			return get_phy_speed_TI_DP83867(xaxiemacp, phy_addr);
 		}
+	} else if (phy_identifier == PHY_REALTEK_IDENTIFIER){
+			return get_Realtek_phy_speed(xaxiemacp, phy_addr);
 	}
 	else {
 	    LWIP_DEBUGF(NETIF_DEBUG, ("XAxiEthernet get_IEEE_phy_speed: Detected PHY with unknown identifier/model.\r\n"));
