@@ -28,7 +28,7 @@
 #include "xspips.h"
 #include "sleep.h"
 
-#ifdef XPS_BOARD_GZU
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 //MCP23S08
 #define SCLK_MAX_FREQ 10000000
 #define MCP23S08_READ 1
@@ -177,4 +177,4 @@ XStatus SpiGpioWriteReg(u8 reg, u8 value)
 
 	return XST_SUCCESS;
 }
-#endif//XPS_BOARD_GZU
+#endif//defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)

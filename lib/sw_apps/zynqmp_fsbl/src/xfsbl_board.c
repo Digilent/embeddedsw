@@ -790,7 +790,7 @@ static void XFsbl_PcieReset(void)
 }
 #endif
 #endif
-#if defined(XPS_BOARD_GZU)
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 #include "sleep.h"
 #include "xgpiops.h"
 /*
@@ -906,7 +906,7 @@ u32 XFsbl_BoardInit(void)
 #if defined(XPS_BOARD_ZCU102)
 	XFsbl_PcieReset();
 #endif
-#elif defined(XPS_BOARD_GZU)
+#elif defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 	XFsbl_Printf(DEBUG_INFO,"Digilent Genesys ZU board-specific init\n\r");
 	Status = InitGpios();
 #else

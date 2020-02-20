@@ -178,7 +178,7 @@ typedef struct XVoutCommands {
 /************************** Function Prototypes ******************************/
 #endif
 
-#if defined(XPS_BOARD_GZU)
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 #include "xgpiops_hw.h"
 #include "spi_gpio.h"
 /*
