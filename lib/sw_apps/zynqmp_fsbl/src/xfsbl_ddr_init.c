@@ -6644,6 +6644,7 @@ static u32 XFsbl_IicReadSpdEeprom(u8 *SpdData)
 		goto END;
 	}
 
+#if !defined(XPS_BOARD_GZU_3EG) && !defined(XPS_BOARD_GZU_5EV)
 	/*
 	 * Configure I2C Mux to select DDR4 SODIMM Slave
 	 * 0x08U - Enable DDR4 SODIMM module
@@ -6683,6 +6684,7 @@ static u32 XFsbl_IicReadSpdEeprom(u8 *SpdData)
 		UStatus = XFSBL_FAILURE;
 		goto END;
 	}
+#endif //!XPS_BOARD_GZU_3EG && !XPS_BOARD_GZU_5EV
 
 	/*
 	 * Set SODIMM control address to enable access to lower
