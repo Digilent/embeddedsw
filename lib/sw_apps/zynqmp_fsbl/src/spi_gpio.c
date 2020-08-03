@@ -25,10 +25,11 @@
  */
 
 #include "spi_gpio.h"
+
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 #include "xspips.h"
 #include "sleep.h"
 
-#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 //MCP23S08
 #define SCLK_MAX_FREQ 10000000
 #define MCP23S08_READ 1

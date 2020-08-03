@@ -27,6 +27,13 @@
 #ifndef SRC_SPI_GPIO_H_
 #define SRC_SPI_GPIO_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "xfsbl_hw.h"
+
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 #include "xstatus.h"
 
 #define SPI_GPIO_DEVICE_ID XPAR_PSU_SPI_0_DEVICE_ID
@@ -37,5 +44,10 @@
 XStatus SpiGpioInit(u32 dev_id, u8 ss_id);
 XStatus SpiGpioReadReg(u8 reg, u8* value);
 XStatus SpiGpioWriteReg(u8 reg, u8 value);
+#endif /* XPS_BOARD_GZU_3EG || XPS_BOARD_GZU_5EV */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SRC_SPI_GPIO_H_ */
