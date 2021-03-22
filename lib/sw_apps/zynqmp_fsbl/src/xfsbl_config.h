@@ -64,9 +64,9 @@ extern "C" {
  *       all data exchanged.
  */
 #define FSBL_PRINT_VAL              (0U)
-#define FSBL_DEBUG_VAL              (0U)
+#define FSBL_DEBUG_VAL              (1U)
 #define FSBL_DEBUG_INFO_VAL         (0U)
-#define FSBL_DEBUG_DETAILED_VAL     (1U)
+#define FSBL_DEBUG_DETAILED_VAL     (0U)
 
 /**
  * FSBL Debug options
@@ -115,14 +115,14 @@ extern "C" {
 #define FSBL_SECURE_EXCLUDE_VAL			(0U)
 #define FSBL_BS_EXCLUDE_VAL				(0U)
 #define FSBL_EARLY_HANDOFF_EXCLUDE_VAL	(1U)
-#define FSBL_WDT_EXCLUDE_VAL			(1U)
+#define FSBL_WDT_EXCLUDE_VAL			(0U)
 #define FSBL_PERF_EXCLUDE_VAL			(1U)
 #define FSBL_A53_TCM_ECC_EXCLUDE_VAL	(1U)
 #define FSBL_PL_CLEAR_EXCLUDE_VAL		(1U)
 #define FSBL_USB_EXCLUDE_VAL			(1U)
 #define FSBL_PROT_BYPASS_EXCLUDE_VAL	(1U)
 #define FSBL_PARTITION_LOAD_EXCLUDE_VAL (0U)
-#define FSBL_FORCE_ENC_EXCLUDE_VAL		(1U)
+#define FSBL_FORCE_ENC_EXCLUDE_VAL		(0U)
 #define FSBL_DDR_SR_EXCLUDE_VAL			(1U)
 
 #if FSBL_NAND_EXCLUDE_VAL
