@@ -22,6 +22,9 @@
  *
  *  Created on: Oct 28, 2019
  *      Author: Elod Gyorgy
+ *
+ *  Changelog:
+ *  	March 22, 2021	- Optimizations for code size
  */
 
 #include "spi_gpio.h"
@@ -39,23 +42,23 @@
 
 struct prescale_t
 {
-	u32 div;
+	u8 div;
 	u8 prescale;
 };
 static const struct prescale_t prescalers[] =
 {
-		{4, XSPIPS_CLK_PRESCALE_4},
-		{8, XSPIPS_CLK_PRESCALE_8},
-		{16, XSPIPS_CLK_PRESCALE_16},
-		{32, XSPIPS_CLK_PRESCALE_32},
-		{64, XSPIPS_CLK_PRESCALE_64},
-		{128, XSPIPS_CLK_PRESCALE_128},
-		{256, XSPIPS_CLK_PRESCALE_256}
+		{4-1, XSPIPS_CLK_PRESCALE_4},
+		{8-1, XSPIPS_CLK_PRESCALE_8},
+		{16-1, XSPIPS_CLK_PRESCALE_16},
+		{32-1, XSPIPS_CLK_PRESCALE_32},
+		{64-1, XSPIPS_CLK_PRESCALE_64},
+		{128-1, XSPIPS_CLK_PRESCALE_128},
+		{256-1, XSPIPS_CLK_PRESCALE_256}
 };
 
 static XSpiPs drv_inst;
-static u8 send_buf_[8];
-static u8 recv_buf_[8];
+static u8 send_buf_[3];
+static u8 recv_buf_[3];
 
 /*
  * @param dev_id SPI controller Device ID
@@ -102,7 +105,7 @@ XStatus SpiGpioInit(u32 dev_id, u8 ss_id)
 	size_t i;
 	for (i=0; i<sizeof(prescalers)/sizeof(prescalers[0]); ++i)
 	{
-		if (SpiConfig->InputClockHz / prescalers[i].div <= SCLK_MAX_FREQ)
+		if (SpiConfig->InputClockHz / (prescalers[i].div+1) <= SCLK_MAX_FREQ)
 			break;
 	}
 

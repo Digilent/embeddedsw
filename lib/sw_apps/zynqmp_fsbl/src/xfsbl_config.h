@@ -77,7 +77,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_DEBUG_VAL
-#define FSBL_DEBUG_VAL              (0U)
+#define FSBL_DEBUG_VAL              (1U)
 #endif
 
 #ifndef FSBL_DEBUG_INFO_VAL
@@ -85,7 +85,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_DEBUG_DETAILED_VAL
-#define FSBL_DEBUG_DETAILED_VAL     (1U)
+#define FSBL_DEBUG_DETAILED_VAL     (0U)
 #endif
 
 /**
@@ -164,7 +164,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_WDT_EXCLUDE_VAL
-#define FSBL_WDT_EXCLUDE_VAL			(1U)
+#define FSBL_WDT_EXCLUDE_VAL			(0U)
 #endif
 
 #ifndef FSBL_PERF_EXCLUDE_VAL
@@ -192,7 +192,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_FORCE_ENC_EXCLUDE_VAL
-#define FSBL_FORCE_ENC_EXCLUDE_VAL		(1U)
+#define FSBL_FORCE_ENC_EXCLUDE_VAL		(0U)
 #endif
 
 #ifndef FSBL_DDR_SR_EXCLUDE_VAL
