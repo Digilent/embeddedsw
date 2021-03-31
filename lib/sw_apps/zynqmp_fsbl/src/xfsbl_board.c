@@ -905,7 +905,7 @@ u32 XFsbl_BoardInit(void)
 	XFsbl_PcieReset();
 #endif
 #elif defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
-	XFsbl_Printf(DEBUG_INFO,"Digilent Genesys ZU board-specific init\n\r");
+	XFsbl_Printf(DEBUG_GENERAL,"Digilent Genesys ZU board-specific init\n\r");
 	Status = InitGpios();
 #else
 	Status = XFSBL_SUCCESS;
