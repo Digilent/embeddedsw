@@ -71,7 +71,11 @@ extern "C" {
 #define XMT_SOURCE_SRCSEL_SHIFT			0
 #define XMT_SOURCE_SRCSEL_MASK			0x00000007
 
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
+#define XMT_REF_FREQ				30.0
+#else
 #define XMT_REF_FREQ				33.3333
+#endif
 
 /* DDR Controller Register Definitions */
 #define XMT_DDRC_MSTR				0xFD070000
