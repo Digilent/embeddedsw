@@ -125,6 +125,8 @@
 #define PHY_REALTEK_IDENTIFIER				0x001c
 #define PHY_XILINX_PCS_PMA_ID1			0x0174
 #define PHY_XILINX_PCS_PMA_ID2			0x0C00
+#define PHY_REALTEK_RTL8211E				0xC915
+#define PHY_REALTEK_RTL8211F				0xC916
 
 #define XEMACPS_GMII2RGMII_SPEED1000_FD		0x140
 #define XEMACPS_GMII2RGMII_SPEED100_FD		0x2100
@@ -138,6 +140,15 @@
 #define PHY_STS			0x11
 #define PHY_TI_CR		0x10
 #define PHY_TI_CFG4		0x31
+
+#define RTL8211F_PAGSR              (0x1f)
+#define RTL8211F_PHYSR              (0x1a)
+#define RTL8211F_PHYSR_PAGE         (0xa43)
+#define RTL8211F_PHYSR_LINK_MASK    (0x0004)
+#define RTL8211F_PHYSR_SPEED_MASK   (0x0030)
+#define RTL8211F_PHYSR_1000         (0x0020)
+#define RTL8211F_PHYSR_100          (0x0010)
+#define RTL8211F_PHYSR_10           (0x0000)
 
 #define PHY_REGCR_ADDR	0x001F
 #define PHY_REGCR_DATA	0x401F
@@ -611,6 +622,7 @@ static u32_t get_Realtek_phy_speed(XEmacPs *xemacpsp, u32_t phy_addr)
 	u16_t status_speed;
 	u32_t timeout_counter = 0;
 	u32_t temp_speed;
+	u16_t phy_identity2 = 0;
 
 	xil_printf("Start PHY autonegotiation \r\n");
 
@@ -660,19 +672,53 @@ static u32_t get_Realtek_phy_speed(XEmacPs *xemacpsp, u32_t phy_addr)
 	}
 	xil_printf("autonegotiation complete \r\n");
 
-	XEmacPs_PhyRead(xemacpsp, phy_addr,IEEE_SPECIFIC_STATUS_REG,
-					&status_speed);
-	if (status_speed & 0x400) {
-		temp_speed = status_speed & IEEE_SPEED_MASK;
+	//Identify PHY model
+	XEmacPs_PhyRead(xemacpsp, phy_addr, PHY_IDENTIFIER_2_REG,
+					&phy_identity2);
 
-		if (temp_speed == IEEE_SPEED_1000)
-			return 1000;
-		else if(temp_speed == IEEE_SPEED_100)
-			return 100;
-		else
-			return 10;
+	switch (phy_identity2)
+	{
+		case PHY_REALTEK_RTL8211F:
+		{
+			xil_printf("detected RTL8211F \r\n");
+			//Switch to page 0xA43
+			XEmacPs_PhyWrite(xemacpsp, phy_addr, RTL8211F_PAGSR, RTL8211F_PHYSR_PAGE);
+			XEmacPs_PhyRead(xemacpsp, phy_addr, RTL8211F_PHYSR, &status_speed);
+			//Switch back to default page
+			XEmacPs_PhyWrite(xemacpsp, phy_addr, RTL8211F_PAGSR, 0);
+			//If there is link
+			if (status_speed & RTL8211F_PHYSR_LINK_MASK) {
+				temp_speed = status_speed & RTL8211F_PHYSR_SPEED_MASK;
+
+				if (temp_speed == RTL8211F_PHYSR_1000)
+					return 1000;
+				else if(temp_speed == RTL8211F_PHYSR_100)
+					return 100;
+				else
+					return 10;
+			}
+			break;
+		}
+		case PHY_REALTEK_RTL8211E:
+			xil_printf("detected RTL8211E \r\n");
+			//RTL8211E fall-back to default Realtek behaviour
+		default:
+		{
+			XEmacPs_PhyRead(xemacpsp, phy_addr,IEEE_SPECIFIC_STATUS_REG,
+							&status_speed);
+			if (status_speed & 0x400) {
+				temp_speed = status_speed & IEEE_SPEED_MASK;
+
+				if (temp_speed == IEEE_SPEED_1000)
+					return 1000;
+				else if(temp_speed == IEEE_SPEED_100)
+					return 100;
+				else
+					return 10;
+			}
+			break;
+		}
 	}
-
 	return XST_FAILURE;
 }
 
