@@ -77,7 +77,7 @@ extern "C" {
 #endif
 
 #ifndef FSBL_DEBUG_VAL
-#define FSBL_DEBUG_VAL              (0U)
+#define FSBL_DEBUG_VAL              (1U)
 #endif
 
 #ifndef FSBL_DEBUG_INFO_VAL
