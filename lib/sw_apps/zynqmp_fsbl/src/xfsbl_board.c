@@ -810,6 +810,94 @@ static void XFsbl_PcieReset(void)
 }
 #endif
 #endif
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
+#include "sleep.h"
+#include "xgpiops.h"
+/*
+ * InitGpios is a board-specific init routine for the Digilent Genesys ZU.
+ * It resets the GPIO expander MCP23S08 using MIO13. Then through SS[1] of
+ * SPI0, it initializes it and cycles the USB PHY resets connected to it.
+ */
+static u32 InitGpios()
+{
+#if defined(XPAR_PSU_SPI_0_DEVICE_ID) && defined (XPAR_PSU_GPIO_0_DEVICE_ID)
+	u32 RegVal;
+	XStatus Status;
+	XGpioPs_Config* gpio_conf;
+	XGpioPs gpio_inst;
+
+	gpio_conf = XGpioPs_LookupConfig(XPAR_PSU_GPIO_0_DEVICE_ID);
+	if (NULL == gpio_conf) {
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIO_FAIL\r\n");
+		return XST_FAILURE;
+	}
+	if (XST_SUCCESS != XGpioPs_CfgInitialize(&gpio_inst, gpio_conf, gpio_conf->BaseAddr))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIO_FAIL\r\n");
+		return XST_FAILURE;
+	}
+	//Set PORTEXP_RESETN_PIN as output and drive 0
+	XGpioPs_SetDirectionPin(&gpio_inst, PORTEXP_RESETN_PIN, 1);
+	XGpioPs_WritePin(&gpio_inst, PORTEXP_RESETN_PIN, 0);
+	XGpioPs_SetOutputEnablePin(&gpio_inst, PORTEXP_RESETN_PIN, 1);
+	(void)usleep(1);
+	//Set PORTEXP_RESETN_PIN tri-state (open-drain high).
+	XGpioPs_SetOutputEnablePin(&gpio_inst, PORTEXP_RESETN_PIN, 0);
+	(void)usleep(1);
+
+	//Init GPIO Expander
+	if (XST_SUCCESS != (Status = SpiGpioInit(MCP23S08_SPI_DEVID, MCP23S08_SS_ID)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_INITFAIL\r\n");
+		return XST_FAILURE;
+	}
+
+	//Set default outputs
+	if (XST_SUCCESS != (SpiGpioWriteReg(MCP23S08_REG_PORT, MCP23S08_DEFAULTS)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_DEFFAIL\r\n");
+		return XST_FAILURE;
+	}
+	//Set I/O direction
+	if (XST_SUCCESS != (SpiGpioWriteReg(MCP23S08_REG_IODIR, MCP23S08_IODIR)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_DIRFAIL\r\n");
+		return XST_FAILURE;
+	}
+	// Set USB20_RESET, USB20H_RESET, USB20_HUB_RESETN
+	if (XST_SUCCESS != (SpiGpioReadReg(MCP23S08_REG_PORT, (u8*)&RegVal)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_READFAIL\r\n");
+		return XST_FAILURE;
+	}
+	RegVal |= 0x10;
+	RegVal |= 0x20;
+	RegVal &= ~(0x40);
+	if (XST_SUCCESS != (SpiGpioWriteReg(MCP23S08_REG_PORT, (u8)RegVal)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_SETRSTFAIL\r\n");
+		return XST_FAILURE;
+	}
+	//10us reset pulse covers it
+	//USB3320 tmin=1us
+	//USB2513 tmin=1us
+	(void)usleep(10);
+
+	//Set default outputs
+	if (XST_SUCCESS != (SpiGpioWriteReg(MCP23S08_REG_PORT, MCP23S08_DEFAULTS)))
+	{
+		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_CLRRSTFAIL\r\n");
+		return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+#else
+	XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_NOSPI0_NOGPIO0\r\n");
+	return XST_FAILURE;
+#endif
+}
+#endif
+
 /*****************************************************************************/
 /**
  * This function does board specific initialization.
@@ -839,6 +927,9 @@ u32 XFsbl_BoardInit(void)
 #if defined(XPS_BOARD_ZCU102)
 	XFsbl_PcieReset();
 #endif
+#elif defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
+	XFsbl_Printf(DEBUG_GENERAL,"Digilent Genesys ZU board-specific init\n\r");
+	Status = InitGpios();
 #else
 	Status = XFSBL_SUCCESS;
 	goto END;

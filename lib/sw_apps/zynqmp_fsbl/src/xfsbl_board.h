@@ -179,6 +179,41 @@ typedef struct XVoutCommands {
 
 /************************** Function Prototypes ******************************/
 #endif
+
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
+#include "xgpiops_hw.h"
+#include "spi_gpio.h"
+/*
+ * Digilent Genesys ZU has an MCP23S08 GPIO expander connected to MIO.
+ * Board init functions below will reset the expander, configure I/O
+ * direction, and cycle resets.
+ * If PSU_SPI_0 is not enabled and SS1 is not mapped to MIO14, init will fail.
+ * If PS GPIO is not enabled and MIO13 not mapped to it, init might fail.
+ */
+#define MCP23S08_SPI_DEVID 0
+#define MCP23S08_SS_ID 1
+#define PORTEXP_RESETN_PIN	13
+#define MCP23S08_DEFAULTS \
+	(0 << 0 /*WIFI_CE*/ \
+	|0 << 1 /*WIFI_IRQ*/ \
+	|1 << 2 /*WIFI_RSTN*/ \
+	|0 << 3 /*WIFI_WAKE*/ \
+	|0 << 4 /*USB20_RESET*/ \
+	|0 << 5 /*USB20H_RESET*/ \
+	|1 << 6 /*USB20_HUB_RESETN*/ \
+	|0 << 7 /*USB30_HC*/ \
+	)
+#define MCP23S08_IODIR \
+	(0 << 0 /*WIFI_CE*/ \
+	|1 << 1 /*WIFI_IRQ*/ \
+	|0 << 2 /*WIFI_RSTN*/ \
+	|0 << 3 /*WIFI_WAKE*/ \
+	|0 << 4 /*USB20_RESET*/ \
+	|0 << 5 /*USB20H_RESET*/ \
+	|0 << 6 /*USB20_HUB_RESETN*/ \
+	|0 << 7 /*USB30_HC*/ \
+	)
+#endif
 u32 XFsbl_BoardInit(void);
 
 #ifdef __cplusplus
