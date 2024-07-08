@@ -86,7 +86,11 @@ extern "C" {
 #ifdef XPAR_PSU_PSS_REF_CLK_FREQ_HZ
 #define XMT_REF_FREQ				(XPAR_PSU_PSS_REF_CLK_FREQ_HZ / 1000000.0)
 #else
+#if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
+#define XMT_REF_FREQ				30.0
+#else
 #define XMT_REF_FREQ				33.3333
+#endif
 #endif
 
 /* DDR Controller Register Definitions */
