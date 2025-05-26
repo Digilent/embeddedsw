@@ -190,7 +190,7 @@ typedef struct XVoutCommands {
  * If PSU_SPI_0 is not enabled and SS1 is not mapped to MIO14, init will fail.
  * If PS GPIO is not enabled and MIO13 not mapped to it, init might fail.
  */
-#define MCP23S08_SPI_DEVID 0
+#define MCP23S08_SPI_PS_BASEADDR XPAR_XSPIPS_0_BASEADDR
 #define MCP23S08_SS_ID 1
 #define PORTEXP_RESETN_PIN	13
 #define MCP23S08_DEFAULTS \

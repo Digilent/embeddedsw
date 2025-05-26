@@ -34,7 +34,7 @@
 #include "sleep.h"
 
 //MCP23S08
-#define SCLK_MAX_FREQ 10000000
+#define SCLK_MAX_FREQ 5000000
 #define MCP23S08_READ 1
 #define MCP23S08_WRITE 0
 #define MCP23S08_ADDRESS 0x20
@@ -98,8 +98,7 @@ XStatus SpiGpioInit(u32 dev_id, u8 ss_id)
 	 * MODE 0 is having issues with clock not going low before SS goes low
 	 * MODE 3 (CPOL=1, CPHA=1) works fine
 	 */
-	XSpiPs_SetOptions(&drv_inst, XSPIPS_MASTER_OPTION | XSPIPS_FORCE_SSELECT_OPTION
-			| XSPIPS_CLK_ACTIVE_LOW_OPTION | XSPIPS_CLK_PHASE_1_OPTION);
+	XSpiPs_SetOptions(&drv_inst, XSPIPS_MASTER_OPTION | XSPIPS_FORCE_SSELECT_OPTION);
 
 
 	size_t i;

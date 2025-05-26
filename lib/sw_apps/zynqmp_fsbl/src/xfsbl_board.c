@@ -820,13 +820,13 @@ static void XFsbl_PcieReset(void)
  */
 static u32 InitGpios()
 {
-#if defined(XPAR_PSU_SPI_0_DEVICE_ID) && defined (XPAR_PSU_GPIO_0_DEVICE_ID)
+#if defined(XPAR_XSPIPS_0_BASEADDR) && defined (XPAR_XGPIOPS_0_BASEADDR)
 	u32 RegVal;
 	XStatus Status;
 	XGpioPs_Config* gpio_conf;
 	XGpioPs gpio_inst;
 
-	gpio_conf = XGpioPs_LookupConfig(XPAR_PSU_GPIO_0_DEVICE_ID);
+	gpio_conf = XGpioPs_LookupConfig(XPAR_XGPIOPS_0_BASEADDR);
 	if (NULL == gpio_conf) {
 		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIO_FAIL\r\n");
 		return XST_FAILURE;
@@ -846,7 +846,7 @@ static u32 InitGpios()
 	(void)usleep(1);
 
 	//Init GPIO Expander
-	if (XST_SUCCESS != (Status = SpiGpioInit(MCP23S08_SPI_DEVID, MCP23S08_SS_ID)))
+	if (XST_SUCCESS != (Status = SpiGpioInit(MCP23S08_SPI_PS_BASEADDR, MCP23S08_SS_ID)))
 	{
 		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_INITFAIL\r\n");
 		return XST_FAILURE;

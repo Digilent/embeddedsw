@@ -36,7 +36,7 @@ extern "C" {
 #if defined(XPS_BOARD_GZU_3EG) || defined(XPS_BOARD_GZU_5EV)
 #include "xstatus.h"
 
-#define SPI_GPIO_DEVICE_ID XPAR_PSU_SPI_0_DEVICE_ID
+#define SPI_GPIO_PS_BASEADDR XPAR_XSPIPS_0_BASEADDR
 #define MCP23S08_REG_IODIR 0x00
 #define MCP23S08_REG_IPOL 0x01
 #define MCP23S08_REG_PORT 0x09
