@@ -820,7 +820,6 @@ static void XFsbl_PcieReset(void)
  */
 static u32 InitGpios()
 {
-#if defined(XPAR_PSU_SPI_0_DEVICE_ID) && defined (XPAR_PSU_GPIO_0_DEVICE_ID)
 	XGpioPs_Config* gpio_conf;
 	u32 spi_dev_id;
 	u32 RegVal;
