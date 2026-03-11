@@ -821,10 +821,23 @@ static void XFsbl_PcieReset(void)
 static u32 InitGpios()
 {
 #if defined(XPAR_PSU_SPI_0_DEVICE_ID) && defined (XPAR_PSU_GPIO_0_DEVICE_ID)
+	XGpioPs_Config* gpio_conf;
+	u32 spi_dev_id;
 	u32 RegVal;
 	XStatus Status;
-	XGpioPs_Config* gpio_conf;
 	XGpioPs gpio_inst;
+
+#if defined(SDT) && defined(XPAR_XGPIOPS_0_BASEADDR) && defined(XPAR_SPI0_BASEADDR)
+	gpio_conf = XGpioPs_LookupConfig(XPAR_XGPIOPS_0_BASEADDR);
+	spi_dev_id = XPAR_SPI0_BASEADDR;
+#elif defined(XPAR_PSU_GPIO_0_DEVICE_ID) && defined(XPAR_PSU_SPI_0_DEVICE_ID)
+	gpio_conf = XGpioPs_LookupConfig(XPAR_PSU_GPIO_0_DEVICE_ID);
+	spi_dev_id = XPAR_PSU_SPI_0_DEVICE_ID;
+#else
+	/* fail fast if either PS GPIO0 or PS SPI0 are missing in the BSP */
+	XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_NOSPI0_NOGPIO0\r\n");
+	return XST_FAILURE;	
+#endif
 
 	gpio_conf = XGpioPs_LookupConfig(XPAR_PSU_GPIO_0_DEVICE_ID);
 	if (NULL == gpio_conf) {
@@ -846,7 +859,7 @@ static u32 InitGpios()
 	(void)usleep(1);
 
 	//Init GPIO Expander
-	if (XST_SUCCESS != (Status = SpiGpioInit(MCP23S08_SPI_DEVID, MCP23S08_SS_ID)))
+	if (XST_SUCCESS != (Status = SpiGpioInit(spi_dev_id, MCP23S08_SS_ID)))
 	{
 		XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_GPIOE_INITFAIL\r\n");
 		return XST_FAILURE;
