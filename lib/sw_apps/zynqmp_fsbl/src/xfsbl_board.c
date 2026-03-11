@@ -904,10 +904,6 @@ static u32 InitGpios()
 	}
 
 	return XST_SUCCESS;
-#else
-	XFsbl_Printf(DEBUG_GENERAL, "XFSBL_GZU_NOSPI0_NOGPIO0\r\n");
-	return XST_FAILURE;
-#endif
 }
 #endif
 
